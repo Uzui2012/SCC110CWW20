@@ -1,6 +1,7 @@
 public class Driver
 {
     public static void main(String[] args) {
-        Board board = new Board();
+        Menu newMenu = new Menu();
+        //Board board = new Board();
     }
 }
