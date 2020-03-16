@@ -24,14 +24,12 @@ public class Menu extends JFrame implements ActionListener, ItemListener
 
         panel.add(new JLabel("Select Level:"));
         panel.add(box);        
-        panel.add(start);
-
-        
+        panel.add(start);        
 
         start.addActionListener(this);
         box.addItemListener(this);
         
-        frame = new JFrame("Hoppers level "); //add level number
+        frame = new JFrame("Hoppers");
         frame.add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setMinimumSize(new Dimension(250, 150));
@@ -42,7 +40,7 @@ public class Menu extends JFrame implements ActionListener, ItemListener
     @Override
     public void itemStateChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
-            selectedLevel = ItemEvent.SELECTED;
+            selectedLevel = Integer.parseInt(e.getItem().toString());
         }
     }
 

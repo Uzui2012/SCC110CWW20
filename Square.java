@@ -13,14 +13,13 @@ public class Square extends JPanel
 {
     private int x, y;
     private Piece piece;
-    public JButton button;    
+    private JButton button;    
     
     public Square(int x, int y, JButton button, Piece piece) {
         this.x = x;
         this.y = y;
         this.button = button;
         this.piece = piece;
-
     }
 
     public int getX(){
@@ -29,6 +28,10 @@ public class Square extends JPanel
 
     public int getY() {
         return this.y;
+    }
+
+    public JButton getButton() {
+        return this.button;
     }
 
     public Piece getPiece() {
@@ -85,5 +88,4 @@ public class Square extends JPanel
                 break;
         }
     }
-
 }

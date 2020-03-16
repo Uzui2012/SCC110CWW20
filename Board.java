@@ -9,17 +9,16 @@ import java.util.Scanner;
 
 public class Board extends JFrame implements ActionListener
 {
-    /**
-     *
-     */
     private Square coordinates[][];
+    private Square selectedSquare;
     private JFrame frame;
     private JPanel panel;
     private boolean selected;
-    private Square selectedSquare = new Square(99, 99, new JButton(), Piece.WATER);
+   
 
     public Board(int selectedLevel) {
         coordinates = new Square[5][];
+        selectedSquare = new Square(99, 99, new JButton(), Piece.WATER);
 
         panel = new JPanel();
         panel.setLayout(new GridLayout(5, 5));
@@ -27,15 +26,13 @@ public class Board extends JFrame implements ActionListener
         String fileName= "levels.csv";
         File file= new File(fileName);
         Scanner inputStream;
-
         int count = 0;
         String[] level = new String[25];
-
         try{
             inputStream = new Scanner(file);
             String line= inputStream.next();
             level = line.split(","); 
-            while(count != selectedLevel){
+            while(count != selectedLevel && inputStream.hasNext()){
                 line = inputStream.next();
                 level = line.split(",");                
                 count++;
@@ -47,26 +44,24 @@ public class Board extends JFrame implements ActionListener
         
         int k = 0;
         for (int i = 0; i < 5; i++) {
-            coordinates[i] = new Square[5]; //init squares
-            for (int j = 0; j < 5; j++) {
-                
+            coordinates[i] = new Square[5];
+            for (int j = 0; j < 5; j++) {                
                 if (level[j+k] .equals("w")) {
                     coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/Water.png")), Piece.WATER);
                 } else if (level[j+k].equals("p")) {
                     coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/LilyPad.png")), Piece.PAD);
                 } else if (level[j+k].equals("g")) {
-                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/GreenFrog.png")),
-                            Piece.GREEN);
+                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/GreenFrog.png")), Piece.GREEN);
                 } else if (level[j+k].equals("r")) {
                     coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/RedFrog.png")), Piece.RED);
                 }
-                panel.add(coordinates[i][j].button);
-                coordinates[i][j].button.addActionListener(this);
+                panel.add(coordinates[i][j].getButton());
+                coordinates[i][j].getButton().addActionListener(this);
             }
             k = k + 5; 
         }
 
-        frame = new JFrame("Hoppers level "); //add level number
+        frame = new JFrame("Hoppers, level " + selectedLevel); //add level number
         frame.add(panel);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setMinimumSize(new Dimension(750, 750));
@@ -79,83 +74,108 @@ public class Board extends JFrame implements ActionListener
         int x = 0, y = 0;
         for (int i = 0; i < coordinates.length; i++) {
             for (int j = 0; j < coordinates[i].length; j++) {
-                if (e.getSource() == coordinates[i][j].button) {
+                if (e.getSource() == coordinates[i][j].getButton()) {
                     x = i;
                     y = j;
                 }
             }
         }
-        
-        //Calculate if a square is selected
+
+        // Calculate if a square is selected
         if (selected) {
-            //If so, calculate legality of move
+            // If so, calculate legality of move
             if (calcLegalMove(x, y)) {
-                //If legal, make move, remove hopped over frog, deselect
+                // If legal, make move, remove hopped over frog, deselect
                 selectedSquare.moveTo(coordinates[x][y]);
-                //RemoveFrog
+                // RemoveFrog
                 removeFrog(x, y);
-                //Deselect
+                // Deselect
                 selected = false;
                 selectedSquare = new Square(99, 99, new JButton(), Piece.WATER);
                 if (numLegalMoves() == 0) {
                     endGame();
                 }
             } else {
-                //If not legal deselect
+                // If not legal deselect
                 selectedSquare.deselectSquare();
                 selected = false;
                 selectedSquare = new Square(99, 99, new JButton(), Piece.WATER);
             }
         } else {
-            //If nothing is selected & clicked square is a green or red frog, select it
-            if (coordinates[x][y].getPiece() == Piece.GREEN || coordinates[x][y].getPiece() == Piece.RED) { 
+            // If nothing is selected & clicked square is a green or red frog, select it
+            if (coordinates[x][y].getPiece() == Piece.GREEN || coordinates[x][y].getPiece() == Piece.RED) {
                 selected = true;
                 coordinates[x][y].selectSquare();
                 selectedSquare = coordinates[x][y];
             }
-            //otherwise, make no selection
+            // Otherwise, make no selection
         }
+
         frame.revalidate();
-        frame.repaint();        
+        frame.repaint();
     }
 
-    public void removeFrog(int x, int y) {
-        //Calculates coordinates of the frog to remove
-        int q = selectedSquare.getX() +  ( (x - selectedSquare.getX()) / 2);
+    /**
+     * Calculates coordinates of the frog to remove, then removes it
+     * @param x x coordinate of frog to remove
+     * @param y y coordinate of frog to remove
+     */
+    private void removeFrog(int x, int y) {
+        int q = selectedSquare.getX() + ((x - selectedSquare.getX()) / 2);
         int r = selectedSquare.getY() + ((y - selectedSquare.getY()) / 2);
-        //Remove Frog
-        coordinates[q][r].button.setIcon(new ImageIcon("images/LilyPad.png"));
+        coordinates[q][r].getButton().setIcon(new ImageIcon("images/LilyPad.png"));
         coordinates[q][r].setPiece(Piece.PAD);
     }
 
-    public boolean calcLegalMove(int x, int y) {
+    /**
+     * This method calculates whether or not the attempted move is within the game's rules
+     * @param x x coordinate of move to test
+     * @param y y coordinate of move to test
+     * @return True if the move was legal, false if not
+     */
+    private boolean calcLegalMove(int x, int y) {
         if (checkFrog(x, y) && checkPad(x, y)) {
             return true;
         }
         return false;
     }
     
-    public boolean checkPad(int x, int y) {
+    /**
+     * This method calculates whether or not the passed coordinates holds a LilyPad piece
+     * @param x x coordinate of pad
+     * @param y y coordinate of pad
+     * @return True if there is a LilyPad, false if there is not
+     */
+    private boolean checkPad(int x, int y) {
         if (coordinates[x][y].getPiece() == Piece.PAD) {
             return true;
         }
         return false;
     }
 
-    public boolean checkFrog(int x, int y) {
+    /**
+     * This method checks that there is a frog in the intervening space between the currently selected square, and the passed square.
+     * @param x x coordinate of square being attempted to be moved to
+     * @param y y coordinate of square being attempted to be moved to
+     * @return true if there exists a frog between squares, false if not
+     */
+    private boolean checkFrog(int x, int y) {
         int xDiff = x - selectedSquare.getX();
         int yDiff = y - selectedSquare.getY();
-        //Coordinates of the intevening space
+        //Coordinates of the intervening space
         int q = selectedSquare.getX() + (xDiff / 2);
         int r = selectedSquare.getY() + (yDiff / 2);
-
         if (coordinates[q][r].getPiece() == Piece.GREEN || coordinates[q][r].getPiece() == Piece.RED) {
             return true;
         }
         return false;
     }
-        
-    public int numLegalMoves() {
+    
+    /**
+     * This method calculates the number of legal moves possible currently on the board 
+     * @return the number of legal moves possible
+     */
+    private int numLegalMoves() {
         Square temp = selectedSquare;
         int count = 0;
         int a[][] = { { -2, -2 }, { -4, 0 }, { -2, 2 }, { 0, 4 }, { 2, 2 }, { 4, 0 }, { 2, -2 }, { 0, -4 }, };
@@ -178,7 +198,7 @@ public class Board extends JFrame implements ActionListener
         return count;
     }
 
-    public void endGame() {
+    private void endGame() {
         JOptionPane.showMessageDialog(frame, "NO MORE MOVES", "GAME OVER", JOptionPane.PLAIN_MESSAGE);
         frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
