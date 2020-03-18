@@ -1,4 +1,8 @@
-import javax.swing.*;
+package main.java.hoppers;
+
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.ImageIcon;
 
 /**
  * Pieces the square can be.
@@ -30,10 +34,8 @@ enum Piece {
     RED_SELECT
 }
 
-@SuppressWarnings("serial")
 /**
- * Represents an individual square upon a board in the game Hoppers. 
- * Many Sqaures can be created however should not be of duplicate parameters.
+ * Square class to represent an individual square upon a board in the game Hoppers. Many Sqaures can be created, however should not be of duplicate parameters.
  */
 public class Square extends JPanel
 {
@@ -109,43 +111,49 @@ public class Square extends JPanel
         switch (this.piece) {
             case GREEN_SELECT:
                 newSquare.setPiece(Piece.GREEN);
-                newSquare.getButton().setIcon(new ImageIcon("images/GreenFrog.png"));
+                newSquare.getButton().setIcon(new ImageIcon("target/resources/images/GreenFrog.png"));
                 break;
             case RED_SELECT:
                 newSquare.setPiece(Piece.RED);
-                newSquare.getButton().setIcon(new ImageIcon("images/RedFrog.png"));
+                newSquare.getButton().setIcon(new ImageIcon("target/resources/images/RedFrog.png"));
                 break;
             default:
                 break;
         }
         this.piece = Piece.PAD;
-        this.button.setIcon(new ImageIcon("images/LilyPad.png"));
+        this.button.setIcon(new ImageIcon("target/resources/images/LilyPad.png"));
     }
     
+    /**
+     * Changes the graphics of the square this method is called from to a selected state, of either the red or green frogs.
+     */
     public void selectSquare() {
         switch (this.piece) {
             case GREEN:
                 this.piece = Piece.GREEN_SELECT;
-                this.button.setIcon(new ImageIcon("images/GreenFrog2.png"));
+                this.button.setIcon(new ImageIcon("target/resources/images/GreenFrog2.png"));
                 break;
             case RED:
                 this.piece = Piece.RED_SELECT;
-                this.button.setIcon(new ImageIcon("images/RedFrog2.png"));
+                this.button.setIcon(new ImageIcon("target/resources/images/RedFrog2.png"));
                 break;
             default:
                 break;
         }
     }
 
+    /**
+     * Changes the graphics of the square this method is called from to a deselected state, of either the red or green frogs.
+     */
     public void deselectSquare() {
         switch (this.piece) {
             case GREEN_SELECT:
                 this.piece = Piece.GREEN;
-                this.button.setIcon(new ImageIcon("images/GreenFrog.png"));
+                this.button.setIcon(new ImageIcon("target/resources/images/GreenFrog.png"));
                 break;
             case RED_SELECT:
                 this.piece = Piece.RED;
-                this.button.setIcon(new ImageIcon("images/RedFrog.png"));
+                this.button.setIcon(new ImageIcon("target/resources/images/RedFrog.png"));
                 break;
             default:
                 break;
