@@ -6,7 +6,10 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 @SuppressWarnings("serial")
-
+/**
+ * Represents and implements the Board of the game Hoppers.
+ * Only one Board should be created at a time.
+ */
 public class Board extends JFrame implements ActionListener
 {
     private Square coordinates[][];
@@ -15,51 +18,18 @@ public class Board extends JFrame implements ActionListener
     private JPanel panel;
     private boolean selected;
    
-
+    /**
+     * Creates a new Board representing the passed selected level, used to be played Hoppers on. 
+     * @param selectedLevel integer passed indicating which level has been selected and must be loaded to the board
+     */
     public Board(int selectedLevel) {
         coordinates = new Square[5][];
         selectedSquare = new Square(99, 99, new JButton(), Piece.WATER);
-
         panel = new JPanel();
+
         panel.setLayout(new GridLayout(5, 5));
 
-        String fileName= "levels.csv";
-        File file= new File(fileName);
-        Scanner inputStream;
-        int count = 0;
-        String[] level = new String[25];
-        try{
-            inputStream = new Scanner(file);
-            String line= inputStream.next();
-            level = line.split(","); 
-            while(count != selectedLevel && inputStream.hasNext()){
-                line = inputStream.next();
-                level = line.split(",");                
-                count++;
-            }
-            inputStream.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        
-        int k = 0;
-        for (int i = 0; i < 5; i++) {
-            coordinates[i] = new Square[5];
-            for (int j = 0; j < 5; j++) {                
-                if (level[j+k] .equals("w")) {
-                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/Water.png")), Piece.WATER);
-                } else if (level[j+k].equals("p")) {
-                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/LilyPad.png")), Piece.PAD);
-                } else if (level[j+k].equals("g")) {
-                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/GreenFrog.png")), Piece.GREEN);
-                } else if (level[j+k].equals("r")) {
-                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/RedFrog.png")), Piece.RED);
-                }
-                panel.add(coordinates[i][j].getButton());
-                coordinates[i][j].getButton().addActionListener(this);
-            }
-            k = k + 5; 
-        }
+        loadLevel(selectedLevel);      
 
         frame = new JFrame("Hoppers, level " + selectedLevel); //add level number
         frame.add(panel);
@@ -116,11 +86,56 @@ public class Board extends JFrame implements ActionListener
     }
 
     /**
+     * This method takes the passed selected level and loads the level off the levels.csv file. 
+     * Then uses the encoded data of the level to constuct this level by initialising the coordinates 2D String array with the appropriate data.
+     * @param selectedLevel The selected level represented as an integer
+     */
+    public void loadLevel(int selectedLevel){
+        String fileName= "levels.csv";
+        File file= new File(fileName);
+        Scanner inputStream;
+        int count = 0;
+        String[] level = new String[25];
+        try{
+            inputStream = new Scanner(file);
+            String line= inputStream.next();
+            level = line.split(","); 
+            while(count != selectedLevel && inputStream.hasNext()){
+                line = inputStream.next();
+                level = line.split(",");                
+                count++;
+            }
+            inputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        int k = 0;
+        for (int i = 0; i < 5; i++) {
+            coordinates[i] = new Square[5];
+            for (int j = 0; j < 5; j++) {                
+                if (level[j+k] .equals("w")) {
+                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/Water.png")), Piece.WATER);
+                } else if (level[j+k].equals("p")) {
+                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/LilyPad.png")), Piece.PAD);
+                } else if (level[j+k].equals("g")) {
+                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/GreenFrog.png")), Piece.GREEN);
+                } else if (level[j+k].equals("r")) {
+                    coordinates[i][j] = new Square(i, j, new JButton(new ImageIcon("images/RedFrog.png")), Piece.RED);
+                }
+                panel.add(coordinates[i][j].getButton());
+                coordinates[i][j].getButton().addActionListener(this);
+            }
+            k = k + 5; 
+        }
+    }
+
+    /**
      * Calculates coordinates of the frog to remove, then removes it
      * @param x x coordinate of frog to remove
      * @param y y coordinate of frog to remove
      */
-    private void removeFrog(int x, int y) {
+    public void removeFrog(int x, int y) {
         int q = selectedSquare.getX() + ((x - selectedSquare.getX()) / 2);
         int r = selectedSquare.getY() + ((y - selectedSquare.getY()) / 2);
         coordinates[q][r].getButton().setIcon(new ImageIcon("images/LilyPad.png"));
@@ -133,7 +148,7 @@ public class Board extends JFrame implements ActionListener
      * @param y y coordinate of move to test
      * @return True if the move was legal, false if not
      */
-    private boolean calcLegalMove(int x, int y) {
+    public boolean calcLegalMove(int x, int y) {
         if (checkFrog(x, y) && checkPad(x, y)) {
             return true;
         }
@@ -146,7 +161,7 @@ public class Board extends JFrame implements ActionListener
      * @param y y coordinate of pad
      * @return True if there is a LilyPad, false if there is not
      */
-    private boolean checkPad(int x, int y) {
+    public boolean checkPad(int x, int y) {
         if (coordinates[x][y].getPiece() == Piece.PAD) {
             return true;
         }
@@ -157,9 +172,9 @@ public class Board extends JFrame implements ActionListener
      * This method checks that there is a frog in the intervening space between the currently selected square, and the passed square.
      * @param x x coordinate of square being attempted to be moved to
      * @param y y coordinate of square being attempted to be moved to
-     * @return true if there exists a frog between squares, false if not
+     * @return True if there exists a frog between squares, false if not
      */
-    private boolean checkFrog(int x, int y) {
+    public boolean checkFrog(int x, int y) {
         int xDiff = x - selectedSquare.getX();
         int yDiff = y - selectedSquare.getY();
         //Coordinates of the intervening space
@@ -173,9 +188,9 @@ public class Board extends JFrame implements ActionListener
     
     /**
      * This method calculates the number of legal moves possible currently on the board 
-     * @return the number of legal moves possible
+     * @return The number of legal moves possible
      */
-    private int numLegalMoves() {
+    public int numLegalMoves() {
         Square temp = selectedSquare;
         int count = 0;
         int a[][] = { { -2, -2 }, { -4, 0 }, { -2, 2 }, { 0, 4 }, { 2, 2 }, { 4, 0 }, { 2, -2 }, { 0, -4 }, };
@@ -198,7 +213,10 @@ public class Board extends JFrame implements ActionListener
         return count;
     }
 
-    private void endGame() {
+    /**
+     * This method is called at the ending of the game, communicates this to the player, and takes the user back to the menu
+     */
+    public void endGame() {
         JOptionPane.showMessageDialog(frame, "NO MORE MOVES", "GAME OVER", JOptionPane.PLAIN_MESSAGE);
         frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         frame.dispatchEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
